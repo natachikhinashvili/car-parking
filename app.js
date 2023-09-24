@@ -51,7 +51,33 @@ app.post('/authorize', async (req, res) => {
         res.status(500).send('Error logging in');
     }
 });
-
+function requireAuth(req, res, next) {
+    if (req.session.userId) {
+      // The user is authenticated, so continue to the next middleware/route
+      next();
+    } else {
+      // The user is not authenticated, so redirect to the login page (or handle as needed)
+      res.redirect('/login');
+    }
+  }
+app.post('/update-password', requireAuth, async (req, res) => {
+    const { newPassword } = req.body;
+    const name = req.session.name; // Get the user's ID from the session
+  
+    try {
+      // Hash the new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+  
+      // Update the user's password in the database
+      await User.update(
+        { password: hashedPassword },
+        { where: { name: name } }
+      );
+  
+    } catch (error) {
+        res.status(500).send('Error logging in');
+    }
+});
 // Start the server
 const port = 3000;
 app.listen(port, () => {
