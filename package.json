@@ -1,0 +1,26 @@
+{
+  "name": "car-parking",
+  "version": "1.0.0",
+  "description": "![RESTAPI](./restapi.png) ## database model ![database](./database.png)",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/natachikhinashvili/car-parking.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/natachikhinashvili/car-parking/issues"
+  },
+  "homepage": "https://github.com/natachikhinashvili/car-parking#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
