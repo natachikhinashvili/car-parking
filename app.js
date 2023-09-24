@@ -29,6 +29,29 @@ app.post('/register', async (req, res) => {
   }
 });
 
+// Serve your HTML file with a button
+app.post('/authorize', async (req, res) => {
+    const { name, password } = req.body;
+
+    try {
+      // Find the user by username
+      const user = await pool.findOne({
+        where: { name },
+      });
+  
+      if (user) {
+        // Compare the provided password with the stored hash
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+  
+        if (isPasswordValid) {
+          req.session.userId = user.id; // Store user ID in the session
+        }
+      }
+    } catch (error) {
+        res.status(500).send('Error logging in');
+    }
+});
+
 // Start the server
 const port = 3000;
 app.listen(port, () => {
