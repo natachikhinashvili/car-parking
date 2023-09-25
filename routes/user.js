@@ -17,6 +17,26 @@ router.post('/register', async (req, res) => {
       res.status(500).json({ error: 'Could not add user' });
     }
 });
+
+async function updateBalances() {
+  try {
+    // Retrieve users from the database
+    const getUsersQuery = 'SELECT name, balance FROM users';
+    const { rows: users } = await pool.query(getUsersQuery);
+
+    // Update each user's balance (subtract a fixed amount, e.g., 10)
+    for (const user of users) {
+      const updatedBalance = user.balance - 10; // Adjust as needed
+      const updateBalanceQuery = 'UPDATE users SET balance = $1 WHERE name = $2';
+      await pool.query(updateBalanceQuery, [updatedBalance, user.name]);
+    }
+
+    console.log('User balances updated successfully');
+  } catch (error) {
+    console.error('Error updating user balances:', error);
+  }
+}
+
 function requireAuth(req, res, next) {
     if (req.session.userId) {
       // The user is authenticated, so continue to the next middleware/route
@@ -35,11 +55,12 @@ router.post('/add-car', requireAuth, async (req, res) => {
     const result = await pool.query(inserCarQuery, values)
     const newCar = result.rows[0];
     res.status(201).json(newCar);
+    setInterval(updateBalances, 10000);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
-
+  
 });
 router.post('/update-car',requireAuth, async (req, res) => {
     try {
