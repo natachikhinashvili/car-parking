@@ -23,11 +23,11 @@ function requireAuth(req, res, next) {
       next();
     } else {
       // The user is not authenticated, so redirect to the login page (or handle as needed)
-      res.redirect('/login');
+      res.redirect('/authorize');
     }
 }
 
-router.post('/add-car', async (req, res) => {
+router.post('/add-car', requireAuth, async (req, res) => {
   try{
     const { name, type, country_code, parking } = req.body;
     const inserCarQuery = 'INSERT INTO cars_table (name, type, country_code, parking) VALUES ($1, $2, $3, $4) RETURNING *'
@@ -36,78 +36,61 @@ router.post('/add-car', async (req, res) => {
     const newCar = result.rows[0];
     res.status(201).json(newCar);
   } catch (error) {
-    // If an error occurs during the execution of the try block, it will be caught here.
-    // You can handle errors and send an appropriate response.
     console.error(error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 
 });
-router.post('/update-car', async (req, res) => {
-    const { newPassword } = req.body;
-    console.log(req.session)
-    const name = req.session.name; // Get the user's ID from the session
-  
+router.post('/update-car',requireAuth, async (req, res) => {
     try {
-  
-      // Update the user's password in the database
-      await User.update(
-        { password: hashedPassword },
-        { where: { name: name } }
-      );
-  
+      const {name, type, country_code, parking} = req.body;
+      const updateCarQuery = 'UPDATE cars SET name = $1, type = $2, country_code = $3, parking = $4 WHERE name = $1 RETURNING *';
+      const values = [name,type,country_code,parking]
+      const result = await pool.query(updateCarQuery, values)
+      const updatedCar = result.rows[0];
+      res.status(201).json(updatedCar);
     } catch (error) {
-        res.status(500).send('Error logging in');
+      console.error(error);
+      res.status(500).json({ message: 'Internal Server Error' });
     }
 });
-router.post('/delete-car', async (req, res) => {
-    console.log(req.session)
-    const name = req.session.name; // Get the user's ID from the session
-  
+router.post('/delete-car', requireAuth, async (req, res) => {
     try {
-  
-      // Update the user's password in the database
-      await User.update(
-        { password: hashedPassword },
-        { where: { name: name } }
-      );
-  
+      const {name} = req.body;
+      const deletecarQuery = 'DELETE FROM cars WHERE name = $1';
+      const values = [name]
+      const result = await pool.query(deletecarQuery, values)
+      const deletedcar = result.rows[0];
+      res.status(201).json(deletedcar);
     } catch (error) {
-        res.status(500).send('Error logging in');
+      console.error(error);
+      res.status(500).json({ message: 'Internal Server Error' });
     }
 });
-router.post('/park', async (req, res) => {
-    console.log(req.session)
-    const name = req.session.name; // Get the user's ID from the session
-  
-    try {
-  
-      // Update the user's password in the database
-      await User.update(
-        { password: hashedPassword },
-        { where: { name: name } }
-      );
-  
-    } catch (error) {
-        res.status(500).send('Error logging in');
-    }
+router.post('/park', requireAuth, async (req, res) => {
+  try{
+    const { name, address } = req.body;
+    const parkcarquery = 'INSERT INTO parking (name, address) VALUES ($1, $2) RETURNING *'
+    const values = [name,address]
+    const result = await pool.query(parkcarquery, values)
+    const parkedcar = result.rows[0];
+    res.status(201).json(parkedcar);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
 });
 router.post('/update-password', requireAuth, async (req, res) => {
-    const { newPassword } = req.body;
-    const name = req.session.name; // Get the user's ID from the session
-  
     try {
-      // Hash the new password
-      const hashedPassword = await bcrypt.hash(newPassword, 10);
-  
-      // Update the user's password in the database
-      await User.update(
-        { password: hashedPassword },
-        { where: { name: name } }
-      );
-  
+      const {name, password} = req.body;
+      const updatepasswordquery = 'UPDATE users_car SET password = $2 WHERE name = $1'
+      const values = [name, password]
+      const result = await pool.query(updatepasswordquery, values)
+      const updatedpassword = result.rows[0];
+      res.status(201).json(updatedpassword);
     } catch (error) {
-        res.status(500).send('Error logging in');
+      console.error(error);
+      res.status(500).json({ message: 'Internal Server Error' });
     }
 });
 module.exports = router;
