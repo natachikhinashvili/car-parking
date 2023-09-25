@@ -1,5 +1,6 @@
 // Create a POST route to add a user
 const express = require('express');
+const pool = require('../pool');
 const router = express.Router();
 
 router.post('/register', async (req, res) => {
@@ -27,20 +28,20 @@ function requireAuth(req, res, next) {
 }
 
 router.post('/add-car', async (req, res) => {
-    console.log(req.session)
-    const name = req.session.name; // Get the user's ID from the session
-  
-    try {
-  
-      // Update the user's password in the database
-      await User.update(
-        { password: hashedPassword },
-        { where: { name: name } }
-      );
-  
-    } catch (error) {
-        res.status(500).send('Error logging in');
-    }
+  try{
+    const { name, type, country_code, parking } = req.body;
+    const inserCarQuery = 'INSERT INTO cars_table (name, type, country_code, parking) VALUES ($1, $2, $3, $4) RETURNING *'
+    const values = [name,type,country_code,parking]
+    const result = await pool.query(inserCarQuery, values)
+    const newCar = result.rows[0];
+    res.status(201).json(newCar);
+  } catch (error) {
+    // If an error occurs during the execution of the try block, it will be caught here.
+    // You can handle errors and send an appropriate response.
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+
 });
 router.post('/update-car', async (req, res) => {
     const { newPassword } = req.body;
