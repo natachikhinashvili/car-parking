@@ -67,19 +67,6 @@ router.post('/delete-car', requireAuth, async (req, res) => {
       res.status(500).json({ message: 'Internal Server Error' });
     }
 });
-router.post('/park', requireAuth, async (req, res) => {
-  try{
-    const { name, address } = req.body;
-    const parkcarquery = 'INSERT INTO parking (name, address) VALUES ($1, $2) RETURNING *'
-    const values = [name,address]
-    const result = await pool.query(parkcarquery, values)
-    const parkedcar = result.rows[0];
-    res.status(201).json(parkedcar);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Internal Server Error' });
-  }
-});
 router.post('/update-password', requireAuth, async (req, res) => {
     try {
       const {name, password} = req.body;

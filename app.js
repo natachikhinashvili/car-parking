@@ -1,5 +1,5 @@
 const express = require('express');
-const { Pool } = require('pg');
+const pool = require('../pool');
 const session = require('express-session');
 const usersRoutes = require('./routes/user');
 const adminRoutes = require('./routes/admin');
@@ -17,14 +17,6 @@ app.use(
 app.use("/user", usersRoutes)
 app.use("/admin", adminRoutes)
 // Create a PostgreSQL pool for connecting to the database
-const pool = new Pool({
-  user: 'app_user',
-  host: 'localhost',
-  database: 'cars',
-  password: 'app_password',
-  port: 5432, // Default PostgreSQL port
-});
-
 
 // Serve your HTML file with a button
 app.post('/authorize', async (req, res) => {
