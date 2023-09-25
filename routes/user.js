@@ -101,4 +101,15 @@ router.post('/update-password', requireAuth, async (req, res) => {
       res.status(500).json({ message: 'Internal Server Error' });
     }
 });
+router.get('/parking-history', requireAuth, async (req, res) => {
+  try {
+    const query = 'SELECT * FROM parking WHERE name = $1';
+    const result = await pool.query(query, [req.session.userId]);
+    const parkinghistory = result.rows[0];
+    res.status(201).json(parkinghistory);
+  } catch (parkinghistory) {
+    console.error('Error querying the database:', error);
+    throw error;
+  }
+});
 module.exports = router;
