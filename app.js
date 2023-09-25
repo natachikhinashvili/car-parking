@@ -1,9 +1,21 @@
 const express = require('express');
 const { Pool } = require('pg');
+const session = require('express-session');
+const usersRoutes = require('./routes/user');
+const adminRoutes = require('./routes/admin');
 
 const app = express();
 app.use(express.json());
-
+app.use(
+    session({
+      secret: 'secret-key', // Replace with your own secret key
+      resave: false,
+      saveUninitialized: true,
+      // You can configure additional options here
+    })
+  );
+app.use("/user", usersRoutes)
+app.use("/admin", adminRoutes)
 // Create a PostgreSQL pool for connecting to the database
 const pool = new Pool({
   user: 'app_user',
@@ -13,21 +25,6 @@ const pool = new Pool({
   port: 5432, // Default PostgreSQL port
 });
 
-// Create a POST route to add a user
-app.post('/register', async (req, res) => {
-  try {
-    const { name, isadmin, password, cars, balance } = req.body;
-    const insertUserQuery = 'INSERT INTO users_car (name, isadmin, password, cars, balance) VALUES ($1, $2, $3, $4, $5) RETURNING *';
-    const values = [name, isadmin, password, cars, balance];
-
-    const result = await pool.query(insertUserQuery, values);
-    const newUser = result.rows[0];
-    res.status(201).json(newUser);
-  } catch (err) {
-    console.error('Error adding user:', err);
-    res.status(500).json({ error: 'Could not add user' });
-  }
-});
 
 // Serve your HTML file with a button
 app.post('/authorize', async (req, res) => {
@@ -44,36 +41,9 @@ app.post('/authorize', async (req, res) => {
         const isPasswordValid = await bcrypt.compare(password, user.password);
   
         if (isPasswordValid) {
-          req.session.userId = user.id; // Store user ID in the session
+          req.session.userId = user.name; // Store user ID in the session
         }
       }
-    } catch (error) {
-        res.status(500).send('Error logging in');
-    }
-});
-function requireAuth(req, res, next) {
-    if (req.session.userId) {
-      // The user is authenticated, so continue to the next middleware/route
-      next();
-    } else {
-      // The user is not authenticated, so redirect to the login page (or handle as needed)
-      res.redirect('/login');
-    }
-  }
-app.post('/update-password', requireAuth, async (req, res) => {
-    const { newPassword } = req.body;
-    const name = req.session.name; // Get the user's ID from the session
-  
-    try {
-      // Hash the new password
-      const hashedPassword = await bcrypt.hash(newPassword, 10);
-  
-      // Update the user's password in the database
-      await User.update(
-        { password: hashedPassword },
-        { where: { name: name } }
-      );
-  
     } catch (error) {
         res.status(500).send('Error logging in');
     }
