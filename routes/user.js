@@ -43,7 +43,8 @@ function requireAuth(req, res, next) {
       next();
     } else {
       // The user is not authenticated, so redirect to the login page (or handle as needed)
-      res.redirect('/authorize');
+      res.status(403).json({ error: 'Access denied. You must be an logged in.' });
+      return;
     }
 }
 

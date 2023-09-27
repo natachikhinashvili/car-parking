@@ -12,7 +12,8 @@ async function requireAdmin(req, res, next){
     }
     const user = rows[0];
     if(!user.isadmin){
-      res.redirect("authorize")
+      res.status(403).json({ error: 'Access denied. You must be an admin.' });
+      return;
     }else{
       next();
     };
