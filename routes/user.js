@@ -24,9 +24,8 @@ async function updateBalances() {
     const getUsersQuery = 'SELECT name, balance FROM users';
     const { rows: users } = await pool.query(getUsersQuery);
 
-    // Update each user's balance (subtract a fixed amount, e.g., 10)
     for (const user of users) {
-      const updatedBalance = user.balance - 10; // Adjust as needed
+      const updatedBalance = user.balance - 10;
       const updateBalanceQuery = 'UPDATE users SET balance = $1 WHERE name = $2';
       await pool.query(updateBalanceQuery, [updatedBalance, user.name]);
     }
@@ -42,7 +41,6 @@ function requireAuth(req, res, next) {
       // The user is authenticated, so continue to the next middleware/route
       next();
     } else {
-      // The user is not authenticated, so redirect to the login page (or handle as needed)
       res.status(403).json({ error: 'Access denied. You must be an logged in.' });
       return;
     }
