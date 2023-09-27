@@ -1,5 +1,5 @@
 const express = require('express');
-const pool = require('../pool');
+const pool = require('./pool');
 const session = require('express-session');
 const usersRoutes = require('./routes/user');
 const adminRoutes = require('./routes/admin');
